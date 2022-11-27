@@ -48,7 +48,7 @@ def unreachable_symbols(grammar: Gr) -> Gr:
     V1 = set()
     wasHere = set()
     while True:
-        NT = V0.intersection(grammar.N)
+        NT = V0.intersection(grammar.N) # Шаг 2
         for nonterm in NT:
             if nonterm not in wasHere:
                 rules = grammar.P.get(nonterm, None)
@@ -61,16 +61,17 @@ def unreachable_symbols(grammar: Gr) -> Gr:
             break
         else:
             V0 = V1.copy()
-    NewNonTerms = V1.intersection(grammar.N)
-    NewTerms = V1.intersection(grammar.T)
-    NewRules = dict()
-    for nonterm in NewNonTerms:
+
+    newNonTerms = V1.intersection(grammar.N)
+    newTerms = V1.intersection(grammar.T)
+    newRules = dict()
+    for nonterm in newNonTerms:
         rules = grammar.P.get(nonterm, None)
         if rules is not None:
-            NewRules[nonterm] = list()
+            newRules[nonterm] = list()
             for rule in rules:
-                NewRules[nonterm].append(rule)
-    return Gr(NewNonTerms, NewTerms, NewRules, grammar.S)
+                newRules[nonterm].append(rule)
+    return Gr(newNonTerms, newTerms, newRules, grammar.S)
 
 def useless_symbols(grammar: Gr) -> Gr|None:
     isEmpty, gr1 = isLanguageEmpty(grammar)
