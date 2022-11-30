@@ -48,7 +48,7 @@ def unreachableSymbols(grammar: Gr) -> Gr:
     """Устранение недостижимых символов в грамматике"""
     V0 = set()
     V0.add(grammar.S) # Шаг 1
-    V1 = set()
+    V1 = V0.copy()
     wasHere = set()
     while True:
         NT = V0.intersection(grammar.N) # Шаг 2
