@@ -6,10 +6,11 @@ def __makeGrammarWithCoolRules(grammar: Gr, coolN: set[str]) -> Gr:
     for nonterm in coolN:
         coolRules[nonterm] = list()
         for rule in grammar.P[nonterm]:
-            ruleLen = len(rule)
-            TIntersect = grammar.T.intersection(rule) # Пересечение терминалов грамматики и терминалов правила
+            ruleset = set(rule)
+            ruleLen = len(ruleset)
+            TIntersect = grammar.T.intersection(ruleset) # Пересечение терминалов грамматики и терминалов правила
             lenTIntersect = len(TIntersect)
-            NIntersect = coolN.intersection(rule) # Пересечение полезных нетерминалов и нетерминалов правила 
+            NIntersect = coolN.intersection(ruleset) # Пересечение полезных нетерминалов и нетерминалов правила 
             lenNIntersect = len(NIntersect)
 
             if (lenTIntersect == ruleLen) or ((lenNIntersect + lenTIntersect) == ruleLen):
@@ -17,17 +18,18 @@ def __makeGrammarWithCoolRules(grammar: Gr, coolN: set[str]) -> Gr:
     return Gr(coolN, grammar.T, coolRules, grammar.S)
 
 
-def isLanguageEmpty(grammar: Gr) -> tuple[bool, Gr|None]:
-    """Порождает ли грамматика непустой язык"""
+def isLanguageEmpty(grammar: Gr) -> tuple[bool, Gr]:
+    """Порождает ли грамматика пустой язык"""
     N0 = set() # Шаг 1
     N1 = set()
     while True:
         for nonterm in grammar.P:
             for rule in grammar.P[nonterm]:
-                ruleLen = len(rule)
-                TIntersect = grammar.T.intersection(rule) # Пересечение терминалов грамматики и терминалов правила
+                ruleset = set(rule)
+                ruleLen = len(ruleset)
+                TIntersect = grammar.T.intersection(ruleset) # Пересечение терминалов грамматики и терминалов правила
                 lenTIntersect = len(TIntersect)
-                NIntersect = N0.intersection(rule) # Пересечение полезных нетерминалов и нетерминалов правила 
+                NIntersect = N0.intersection(ruleset) # Пересечение полезных нетерминалов и нетерминалов правила 
                 lenNIntersect = len(NIntersect)
 
                 if (lenTIntersect == ruleLen) or ((lenNIntersect + lenTIntersect) == ruleLen):
@@ -40,9 +42,10 @@ def isLanguageEmpty(grammar: Gr) -> tuple[bool, Gr|None]:
     if grammar.S in N1: # Шаг 4
         return False, __makeGrammarWithCoolRules(grammar, N1)
     else:
-        return True, None
+        return True, grammar
 
 def unreachable_symbols(grammar: Gr) -> Gr:
+    """Устранение недостижимых символов в грамматике"""
     V0 = set()
     V0.add(grammar.S) # Шаг 1
     V1 = set()
@@ -73,8 +76,9 @@ def unreachable_symbols(grammar: Gr) -> Gr:
                 newRules[nonterm].append(rule)
     return Gr(newNonTerms, newTerms, newRules, grammar.S)
 
-def useless_symbols(grammar: Gr) -> Gr|None:
+def useless_symbols(grammar: Gr) -> Gr:
+    """Устранение бесполезных символов в грамматике"""
     isEmpty, gr1 = isLanguageEmpty(grammar)
     if not isEmpty:
-        return unreachable_symbols(gr1) # type: ignore
-    return None
+        return unreachable_symbols(gr1)
+    return grammar
