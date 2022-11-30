@@ -44,7 +44,7 @@ def isLanguageEmpty(grammar: Gr) -> tuple[bool, Gr]:
     else:
         return True, grammar
 
-def unreachable_symbols(grammar: Gr) -> Gr:
+def unreachableSymbols(grammar: Gr) -> Gr:
     """Устранение недостижимых символов в грамматике"""
     V0 = set()
     V0.add(grammar.S) # Шаг 1
@@ -76,9 +76,9 @@ def unreachable_symbols(grammar: Gr) -> Gr:
                 newRules[nonterm].append(rule)
     return Gr(newNonTerms, newTerms, newRules, grammar.S)
 
-def useless_symbols(grammar: Gr) -> Gr:
+def uselessSymbols(grammar: Gr) -> Gr:
     """Устранение бесполезных символов в грамматике"""
     isEmpty, gr1 = isLanguageEmpty(grammar)
     if not isEmpty:
-        return unreachable_symbols(gr1)
+        return unreachableSymbols(gr1)
     return grammar
