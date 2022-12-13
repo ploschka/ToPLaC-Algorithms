@@ -90,16 +90,3 @@ def uselessSymbols(grammar: Gr) -> Gr:
     if not isEmpty:
         return unreachableSymbols(gr1)
     return grammar
-
-
-if __name__ == "__main__":
-    input_g = Gr({"A", "B", "C", "O"},  # Нетерминалы
-                 {"a", "b", "c", "o"},  # Терминалы
-                 {  # Правила вывода
-                     "A": ["ABOBA", "ABBA", "B"],
-                     "B": ["CoCa", "Bb"],
-                     "C": ["ccc"],
-                     "O": ["abOba", "A"]
-                 },
-                 "A")  # Аксиома
-    print(isLanguageEmpty(input_g))
