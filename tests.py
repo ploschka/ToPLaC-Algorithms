@@ -243,5 +243,30 @@ class TestExcessLambdaRules(unittest.TestCase):
             expected_g
         )
 
+    def test_no_lambda_rules(self):
+        input_g = Gr(
+            {'S', 'new_S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+                'new_S': {'', 'S'}
+            },
+            'new_S'
+        )
+        expected_g = Gr(
+            {'S', 'new_S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+                'new_S': {'', 'S'}
+            },
+            'new_S'
+        )
+
+        self.assertEqual(
+            algorithms.wipeExcessLambdaRules(input_g),
+            expected_g
+        )
+
 
 unittest.main()

@@ -79,10 +79,9 @@ def unreachableSymbols(grammar: Gr) -> Gr:
                 newRules[nonterm].add(rule)
     return Gr(newNonTerms, newTerms, newRules, grammar.S)
 
-
 def unreachableSymbolsShort(g: Gr) -> Gr:
     reachable = {g.S}
-    [reachable := reachable | set.union(*[set(g.P.get(ch, [])[i]) for ch in reachable for i in range(len(g.P.get(ch, [])))]) for _ in range(len(g.P))]
+    [reachable := reachable | set.union(*[set(g.P.get(ch, set())[i]) for ch in reachable for i in range(len(g.P.get(ch, set())))]) for _ in range(len(g.P))]
     return Gr(g.N.intersection(reachable), g.T.intersection(reachable), {ch: g.P[ch] for ch in reachable if g.P.get(ch) is not None}, g.S)
 
 def uselessSymbols(grammar: Gr) -> Gr:
@@ -97,7 +96,7 @@ def __add_new_rules_to_dict_of_p_i(dict_of_p_i: dict,
                                      string: str,
                                      list_of_indexes_to_alternate: list[int]):
     amount_of_indexes = len(list_of_indexes_to_alternate)
-    p_i_right_part: list[str] = []
+    p_i_right_part: set[str] = set()
     if amount_of_indexes > 0:
         listed_pattern: list[int]
         buffer_string: str
@@ -114,12 +113,12 @@ def __add_new_rules_to_dict_of_p_i(dict_of_p_i: dict,
                     buffer_string = buffer_string[:list_of_indexes_to_alternate[i]-index_shift] + \
                                     buffer_string[list_of_indexes_to_alternate[i]-index_shift+1:]
                     index_shift += 1
-            p_i_right_part.append(buffer_string)
+            p_i_right_part.add(buffer_string)
     else:
-        p_i_right_part.append(string)
+        p_i_right_part.add(string)
     if dict_key in dict_of_p_i.keys():
-        dict_of_p_i[dict_key] += p_i_right_part
-        dict_of_p_i[dict_key] = list(set(dict_of_p_i[dict_key]))
+        dict_of_p_i[dict_key].update(p_i_right_part)
+        dict_of_p_i[dict_key] = set(dict_of_p_i[dict_key])
     else:
         dict_of_p_i[dict_key] = p_i_right_part
 
@@ -282,7 +281,7 @@ def wipeExcessLambdaRules(grammar: Gr) -> Gr:
     new_axiom: str = grammar.S
     if grammar.S == "" or grammar.S in n_lambda:
         new_axiom = "new_" + grammar.S
-        new_rules[new_axiom] = [grammar.S, ""]
+        new_rules[new_axiom] = {grammar.S, ""}
 
     """
     Шаг 6.
