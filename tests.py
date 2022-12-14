@@ -8,9 +8,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["E+T", "T"],
-                         "T": ["T*F", "F"],
-                         "F": ["(E)", "a"],
+                         "E": {"E+T", "T"},
+                         "T": {"T*F", "F"},
+                         "F": {"(E)", "a"},
                      },
                      "E")  # Аксиома
         expected_answer = False
@@ -23,8 +23,8 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["E+T", "T"],
-                         "F": ["(E)", "a"],
+                         "E": {"E+T", "T"},
+                         "F": {"(E)", "a"},
                      },
                      "E")  # Аксиома
         expected_answer = True
@@ -48,7 +48,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["a"],
+                         "E": {"a"},
                      },
                      "E")  # Аксиома
         expected_answer = False
@@ -61,9 +61,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      set(),  # Терминалы
                      {  # Правила вывода
-                         "A": ["B"],
-                         "B": ["C"],
-                         "C": ["A"],
+                         "A": {"B"},
+                         "B": {"C"},
+                         "C": {"A"},
                      },
                      "A")  # Аксиома
         expected_answer = True
@@ -76,9 +76,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      {"a", "b", "c"},  # Терминалы
                      {  # Правила вывода
-                         "A": ["BaaB"],
-                         "B": ["CcCcC"],
-                         "C": ["ccc"],
+                         "A": {"BaaB"},
+                         "B": {"CcCcC"},
+                         "C": {"ccc"},
                      },
                      "A")  # Аксиома
         expected_answer = False
@@ -91,10 +91,10 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C", "O"},  # Нетерминалы
                      {"a", "b", "c", "o"},  # Терминалы
                      {  # Правила вывода
-                         "A": ["ABOBA", "ABBA", "B"],
-                         "B": ["CoCa", "Bb"],
-                         "C": ["ccc"],
-                         "O": ["abOba", "A"]
+                         "A": {"ABOBA", "ABBA", "B"},
+                         "B": {"CoCa", "Bb"},
+                         "C": {"ccc"},
+                         "O": {"abOba", "A"}
                      },
                      "A")  # Аксиома
         expected_answer = False
@@ -109,19 +109,20 @@ class TestUnreachableSymbols(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["E+T", "T"],
-                         "T": ["T*F", "F"],
-                         "F": ["(E)", "a"],
+                         "E": {"E+T", "T"},
+                         "T": {"T*F", "F"},
+                         "F": {"(E)", "a"},
                      },
                      "E")  # Аксиома
         expected_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["E+T", "T"],
-                         "T": ["T*F", "F"],
-                         "F": ["(E)", "a"],
+                         "E": {"E+T", "T"},
+                         "T": {"T*F", "F"},
+                         "F": {"(E)", "a"},
                      },
                      "E")  # Аксиома
+
         self.assertEqual(
             algorithms.unreachableSymbols(input_g),
             expected_g
@@ -135,14 +136,14 @@ class TestUnreachableSymbols(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": ["E+T", "T"],
-                         "F": ["(E)", "a"],
+                         "E": {"E+T", "T"},
+                         "F": {"(E)", "a"},
                      },
                      "E")  # Аксиома
         expected_g = Gr({"E", "T"},  # Нетерминалы
                         {"+"},  # Терминалы
                         {  # Правила вывода
-                            "E": ["E+T", "T"],
+                            "E": {"E+T", "T"},
                         },
                         "E")  # Аксиома
         self.assertEqual(
@@ -151,6 +152,94 @@ class TestUnreachableSymbols(unittest.TestCase):
         )
         self.assertEqual(
             algorithms.unreachableSymbolsShort(input_g),
+            expected_g
+        )
+
+class TestExcessLambdaRules(unittest.TestCase):
+    def test_classic1(self):
+        input_g = Gr(
+            {'A', 'B', 'M', 'N', 'K', 'S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'A': {''},
+                'B': {''},
+                'M': {'AB'},
+                'N': {'Ab'},
+                'K': {'ab'},
+                'S': {'KNM'}
+            },
+            'S'
+        )
+        expected_g = Gr(
+            {'N', 'K', 'S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'N': {'b'},
+                'K': {'ab'},
+                'S': {'KN'},
+            },
+            'S'
+        )
+
+        self.assertEqual(
+            algorithms.wipeExcessLambdaRules(input_g),
+            expected_g
+        )
+
+    def test_classic2(self):
+        input_g = Gr(
+            {'A', 'B', 'M', 'N', 'K', 'S'},
+            {'a', 'b', 'c', 'p'},
+            {  # Правила вывода
+                'A': {'', 'c'},
+                'B': {'', 'p'},
+                'M': {'AB'},
+                'N': {'Ab'},
+                'K': {'ab'},
+                'S': {'KNM'},
+            },
+            'S'
+        )
+        expected_g = Gr(
+            {'A', 'B', 'M', 'N', 'K', 'S'},
+            {'a', 'b', 'c', 'p'},
+            {  # Правила вывода
+                'A': {'c'},
+                'B': {'p'},
+                'M': {'AB', 'A', 'B'},
+                'N': {'Ab', 'b'},
+                'K': {'ab'},
+                'S': {'KNM', 'KN'},
+            },
+            'S'
+        )
+
+        self.assertEqual(
+            algorithms.wipeExcessLambdaRules(input_g),
+            expected_g
+        )
+    
+    def test_classic3(self):
+        input_g = Gr(
+            {'S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'S': {'aSbS', 'bSaS', ''}
+            },
+            'S'
+        )
+        expected_g = Gr(
+            {'S', 'new_S'},
+            {'a', 'b'},
+            {  # Правила вывода
+                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+                'new_S': {'', 'S'}
+            },
+            'new_S'
+        )
+
+        self.assertEqual(
+            algorithms.wipeExcessLambdaRules(input_g),
             expected_g
         )
 

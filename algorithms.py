@@ -74,9 +74,9 @@ def unreachableSymbols(grammar: Gr) -> Gr:
     for nonterm in newNonTerms:
         rules = grammar.P.get(nonterm, None)
         if rules is not None:
-            newRules[nonterm] = list()
+            newRules[nonterm] = set()
             for rule in rules:
-                newRules[nonterm].append(rule)
+                newRules[nonterm].add(rule)
     return Gr(newNonTerms, newTerms, newRules, grammar.S)
 
 
@@ -153,10 +153,9 @@ def wipeExcessLambdaRules(grammar: Gr) -> Gr:
     for non_term in grammar.N:
         if non_term not in grammar.P.keys():
             continue
-        count_of_all_lambda_consequents = grammar.P[non_term].count("")
-        if count_of_all_lambda_consequents > 0:
+        if '' in grammar.P[non_term]:
             n_lambda.add(non_term)
-            if count_of_all_lambda_consequents == len(grammar.P[non_term]):
+            if len(grammar.P[non_term]) == 1:
                 pure_n_lambda.add(non_term)
 
     """
