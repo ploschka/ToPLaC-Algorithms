@@ -2,19 +2,14 @@ from mytoken import *
 from mytoken import MyToken as Tk
 
 class Grammar:
-    Tokens = dict()
     N = set()
     T = set()
 
     def __init__(self, N: set[str], T: set[str], P: dict[Tk, set[tuple]], S: str):
-        for i in N:
-            self.Tokens[i] = Tk(TOKEN_NONTERM, i)
-            self.N.add(self.Tokens[i]) # Нетерминалы. Например, {"E", "T", "F"}
-        for i in T:
-            self.Tokens[i] = Tk(TOKEN_TERM, i)
-            self.T.add(self.Tokens[i]) # Терминалы. Например, {"a", "(", ")"}
+        self.N = set([Tk(TOKEN_NONTERM, i) for i in N]) # Нетерминалы. Например, {"E", "T", "F"}
+        self.T = set([Tk(TOKEN_TERM, i) for i in T]) # Терминалы. Например, {"a", "(", ")"}
         self.P = P # Правила. Например, { "E": {"E+T", "T"}, "T": {"T*F", "F"}, "F": {"(E)", "a"} }
-        self.S = self.Tokens[S] # Аксиома (начальный символ грамматики). Например, "E"
+        self.S = Tk(TOKEN_NONTERM, S) # Аксиома (начальный символ грамматики). Например, "E"
 
     def getN(self):
         return set([i.symbol for i in self.N])

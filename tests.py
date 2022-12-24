@@ -29,8 +29,10 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"E+T", "T"},
-                         "F": {"(E)", "a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                  (Tk(TOKEN_TERM, "a"),)},
                      },
                      "E")  # Аксиома
         expected_answer = True
@@ -54,7 +56,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_TERM, "a"),)},
                      },
                      "E")  # Аксиома
         expected_answer = False
@@ -67,9 +69,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      set(),  # Терминалы
                      {  # Правила вывода
-                         "A": {"B"},
-                         "B": {"C"},
-                         "C": {"A"},
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"), )},
+                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), )},
+                         Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_NONTERM, "A"), )},
                      },
                      "A")  # Аксиома
         expected_answer = True
@@ -82,9 +84,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      {"a", "b", "c"},  # Терминалы
                      {  # Правила вывода
-                         "A": {"BaaB"},
-                         "B": {"CcCcC"},
-                         "C": {"ccc"},
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "B"))},
+                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"))},
+                         Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"))},
                      },
                      "A")  # Аксиома
         expected_answer = False
@@ -97,10 +99,14 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C", "O"},  # Нетерминалы
                      {"a", "b", "c", "o"},  # Терминалы
                      {  # Правила вывода
-                         "A": {"ABOBA", "ABBA", "B"},
-                         "B": {"CoCa", "Bb"},
-                         "C": {"ccc"},
-                         "O": {"abOba", "A"}
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "O"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
+                                                  (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
+                                                  (Tk(TOKEN_NONTERM, "B"),)},
+                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "o"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "a")),
+                                                  (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "b"))},
+                         Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"))},
+                         Tk(TOKEN_NONTERM, "O"): {(Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "O"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_TERM, "a")),
+                                                  (Tk(TOKEN_NONTERM, "A"),)},
                      },
                      "A")  # Аксиома
         expected_answer = False
@@ -115,17 +121,23 @@ class TestUnreachableSymbols(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"E+T", "T"},
-                         "T": {"T*F", "F"},
-                         "F": {"(E)", "a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                         Tk(TOKEN_NONTERM, "T"): {(Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+                                                  (Tk(TOKEN_NONTERM, "F"),)},
+                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                  (Tk(TOKEN_TERM, "a"),)},
                      },
                      "E")  # Аксиома
         expected_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"E+T", "T"},
-                         "T": {"T*F", "F"},
-                         "F": {"(E)", "a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                         Tk(TOKEN_NONTERM, "T"): {(Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+                                                  (Tk(TOKEN_NONTERM, "F"),)},
+                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                  (Tk(TOKEN_TERM, "a"),)},
                      },
                      "E")  # Аксиома
 
@@ -142,14 +154,17 @@ class TestUnreachableSymbols(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"E+T", "T"},
-                         "F": {"(E)", "a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                  (Tk(TOKEN_TERM, "a"),)},
                      },
                      "E")  # Аксиома
         expected_g = Gr({"E", "T"},  # Нетерминалы
                         {"+"},  # Терминалы
                         {  # Правила вывода
-                            "E": {"E+T", "T"},
+                            Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
                         },
                         "E")  # Аксиома
         self.assertEqual(

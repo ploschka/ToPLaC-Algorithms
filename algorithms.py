@@ -4,12 +4,12 @@ from mytoken import MyToken as Tk
 import itertools
 
 
-def __makeGrammarWithCoolRules(grammar: Gr, coolN: set[str]) -> Gr:
+def __makeGrammarWithCoolRules(grammar: Gr, coolN: set[Tk]) -> Gr:
     """Возвращает грамматику только с нетерминалами из которых выводятся терминалы"""
     coolRules = dict()
     for nonterm in coolN:
         coolRules[nonterm] = set()
-        for rule in grammar.P[grammar.Tokens[nonterm]]:
+        for rule in grammar.P[nonterm]:
             ruleset = set(rule)
             ruleLen = len(ruleset)
             TIntersect = grammar.T.intersection(ruleset)  # Пересечение терминалов грамматики и терминалов правила
@@ -18,8 +18,8 @@ def __makeGrammarWithCoolRules(grammar: Gr, coolN: set[str]) -> Gr:
             lenNIntersect = len(NIntersect)
 
             if (lenTIntersect == ruleLen) or ((lenNIntersect + lenTIntersect) == ruleLen):
-                coolRules[nonterm].append(rule)
-    return Gr(coolN, grammar.getT(), coolRules, grammar.S.symbol)
+                coolRules[nonterm].add(rule)
+    return Gr(set([i.symbol for i in coolN]), grammar.getT(), coolRules, grammar.S.symbol)
 
 def isLanguageEmpty(grammar: Gr) -> tuple[bool, Gr]:
     """Порождает ли грамматика пустой язык"""
@@ -78,7 +78,7 @@ def unreachableSymbols(grammar: Gr) -> Gr:
             newRules[nonterm] = set()
             for rule in rules:
                 newRules[nonterm].add(rule)
-    return Gr(newNonTerms, newTerms, newRules, grammar.S.symbol)
+    return Gr(set([i.symbol for i in newNonTerms]), set([i.symbol for i in newTerms]), newRules, grammar.S.symbol)
 
 # def unreachableSymbolsShort(g: Gr) -> Gr:
 #     reachable = {g.S}
