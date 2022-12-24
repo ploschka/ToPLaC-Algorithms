@@ -1,7 +1,11 @@
-import algorithms
+from alg.isLanguageEmpty import isLanguageEmpty
+from alg.unreachableSymbols import unreachableSymbols
+from alg.uselessSymbols import uselessSymbols
+
 from grammar import Grammar as Gr
 from mytoken import *
 from mytoken import MyToken as Tk
+
 import unittest
 
 
@@ -21,7 +25,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                     )
         expected_answer = False
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -37,7 +41,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "E")  # Аксиома
         expected_answer = True
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -48,7 +52,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "E")  # Аксиома
         expected_answer = True
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -61,7 +65,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "E")  # Аксиома
         expected_answer = False
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -76,7 +80,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "A")  # Аксиома
         expected_answer = True
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -91,7 +95,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "A")  # Аксиома
         expected_answer = False
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -111,7 +115,7 @@ class TestIsLanguageEmpty(unittest.TestCase):
                      "A")  # Аксиома
         expected_answer = False
         self.assertEqual(
-            algorithms.isLanguageEmpty(input_g)[0],
+            isLanguageEmpty(input_g)[0],
             expected_answer
         )
 
@@ -142,11 +146,11 @@ class TestUnreachableSymbols(unittest.TestCase):
                      "E")  # Аксиома
 
         self.assertEqual(
-            algorithms.unreachableSymbols(input_g),
+            unreachableSymbols(input_g),
             expected_g
         )
         # self.assertEqual(
-        #     algorithms.unreachableSymbolsShort(input_g),
+        #     unreachableSymbolsShort(input_g),
         #     expected_g
         # )
 
@@ -168,11 +172,11 @@ class TestUnreachableSymbols(unittest.TestCase):
                         },
                         "E")  # Аксиома
         self.assertEqual(
-            algorithms.unreachableSymbols(input_g),
+            unreachableSymbols(input_g),
             expected_g
         )
         # self.assertEqual(
-        #     algorithms.unreachableSymbolsShort(input_g),
+        #     unreachableSymbolsShort(input_g),
         #     expected_g
         # )
 
@@ -203,7 +207,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #         )
 
 #         self.assertEqual(
-#             algorithms.wipeExcessLambdaRules(input_g),
+#             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
 
@@ -236,7 +240,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #         )
 
 #         self.assertEqual(
-#             algorithms.wipeExcessLambdaRules(input_g),
+#             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
     
@@ -260,7 +264,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #         )
 
 #         self.assertEqual(
-#             algorithms.wipeExcessLambdaRules(input_g),
+#             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
 
@@ -285,7 +289,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #         )
 
 #         self.assertEqual(
-#             algorithms.wipeExcessLambdaRules(input_g),
+#             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
 
@@ -310,7 +314,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #         )
 
 #         self.assertEqual(
-#             algorithms.wipeExcessLambdaRules(input_g),
+#             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
 
