@@ -1,16 +1,35 @@
+from mytoken import *
+from mytoken import MyToken as Tk
+
 class Grammar:
-    def __init__(self, N: set[str], T: set[str], P: dict[str, set[str]], S: str):
-        self.N = N  # Нетерминалы. Например, {"E", "T", "F"}
-        self.T = T  # Терминалы. Например, {"a", "(", ")"}
-        self.P = P  # Правила. Например, { "E": ["E+T", "T"], "T": {"T*F", "F"}, "F": {"(E)", "a"} }
-        self.S = S  # Аксиома (начальный символ грамматики). Например, "E"
+    Tokens = dict()
+    N = set()
+    T = set()
+
+    def __init__(self, N: set[str], T: set[str], P: dict[Tk, set[tuple]], S: str):
+        for i in N:
+            self.Tokens[i] = Tk(TOKEN_NONTERM, i)
+            self.N.add(self.Tokens[i]) # Нетерминалы. Например, {"E", "T", "F"}
+        for i in T:
+            self.Tokens[i] = Tk(TOKEN_TERM, i)
+            self.T.add(self.Tokens[i]) # Терминалы. Например, {"a", "(", ")"}
+        self.P = P # Правила. Например, { "E": {"E+T", "T"}, "T": {"T*F", "F"}, "F": {"(E)", "a"} }
+        self.S = self.Tokens[S] # Аксиома (начальный символ грамматики). Например, "E"
+
+    def getN(self):
+        return set([i.symbol for i in self.N])
+
+    def getT(self):
+        return set([i.symbol for i in self.T])
+
+    def getS(self):
+        return self.S.symbol
 
     def __str__(self):
         """Метод для красивого вывода грамматики с помощью print()"""
         rules = ""
         for non_term in self.P.keys():
-            rules += f"\n\t\t{non_term} -> " + \
-                     " | ".join(self.P[non_term])
+            rules += f"\n\t\t{non_term.symbol} -> " + " | ".join(*[([nt.symbol for nt in st]) for st in self.P[non_term]])
         return f"""{{
     Нетерминалы: {self.N}
     Терминалы: {self.T}

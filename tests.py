@@ -1,5 +1,7 @@
 import algorithms
 from grammar import Grammar as Gr
+from mytoken import *
+from mytoken import MyToken as Tk
 import unittest
 
 
@@ -8,11 +10,15 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"E", "T", "F"},  # Нетерминалы
                      {"a", "+", "*", "(", ")"},  # Терминалы
                      {  # Правила вывода
-                         "E": {"E+T", "T"},
-                         "T": {"T*F", "F"},
-                         "F": {"(E)", "a"},
+                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                         Tk(TOKEN_NONTERM, "T"): {(Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+                                                  (Tk(TOKEN_NONTERM, "F"),)},
+                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                  (Tk(TOKEN_TERM, "a"),)},
                      },
-                     "E")  # Аксиома
+                     "E" # Аксиома
+                    )
         expected_answer = False
         self.assertEqual(
             algorithms.isLanguageEmpty(input_g)[0],
@@ -155,142 +161,142 @@ class TestUnreachableSymbols(unittest.TestCase):
         #     expected_g
         # )
 
-class TestExcessLambdaRules(unittest.TestCase):
-    def test_classic1(self):
-        input_g = Gr(
-            {'A', 'B', 'M', 'N', 'K', 'S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'A': {''},
-                'B': {''},
-                'M': {'AB'},
-                'N': {'Ab'},
-                'K': {'ab'},
-                'S': {'KNM'}
-            },
-            'S'
-        )
-        expected_g = Gr(
-            {'N', 'K', 'S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'N': {'b'},
-                'K': {'ab'},
-                'S': {'KN'},
-            },
-            'S'
-        )
+# class TestExcessLambdaRules(unittest.TestCase):
+#     def test_classic1(self):
+#         input_g = Gr(
+#             {'A', 'B', 'M', 'N', 'K', 'S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'A': {''},
+#                 'B': {''},
+#                 'M': {'AB'},
+#                 'N': {'Ab'},
+#                 'K': {'ab'},
+#                 'S': {'KNM'}
+#             },
+#             'S'
+#         )
+#         expected_g = Gr(
+#             {'N', 'K', 'S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'N': {'b'},
+#                 'K': {'ab'},
+#                 'S': {'KN'},
+#             },
+#             'S'
+#         )
 
-        self.assertEqual(
-            algorithms.wipeExcessLambdaRules(input_g),
-            expected_g
-        )
+#         self.assertEqual(
+#             algorithms.wipeExcessLambdaRules(input_g),
+#             expected_g
+#         )
 
-    def test_classic2(self):
-        input_g = Gr(
-            {'A', 'B', 'M', 'N', 'K', 'S'},
-            {'a', 'b', 'c', 'p'},
-            {  # Правила вывода
-                'A': {'', 'c'},
-                'B': {'', 'p'},
-                'M': {'AB'},
-                'N': {'Ab'},
-                'K': {'ab'},
-                'S': {'KNM'},
-            },
-            'S'
-        )
-        expected_g = Gr(
-            {'A', 'B', 'M', 'N', 'K', 'S'},
-            {'a', 'b', 'c', 'p'},
-            {  # Правила вывода
-                'A': {'c'},
-                'B': {'p'},
-                'M': {'AB', 'A', 'B'},
-                'N': {'Ab', 'b'},
-                'K': {'ab'},
-                'S': {'KNM', 'KN'},
-            },
-            'S'
-        )
+#     def test_classic2(self):
+#         input_g = Gr(
+#             {'A', 'B', 'M', 'N', 'K', 'S'},
+#             {'a', 'b', 'c', 'p'},
+#             {  # Правила вывода
+#                 'A': {'', 'c'},
+#                 'B': {'', 'p'},
+#                 'M': {'AB'},
+#                 'N': {'Ab'},
+#                 'K': {'ab'},
+#                 'S': {'KNM'},
+#             },
+#             'S'
+#         )
+#         expected_g = Gr(
+#             {'A', 'B', 'M', 'N', 'K', 'S'},
+#             {'a', 'b', 'c', 'p'},
+#             {  # Правила вывода
+#                 'A': {'c'},
+#                 'B': {'p'},
+#                 'M': {'AB', 'A', 'B'},
+#                 'N': {'Ab', 'b'},
+#                 'K': {'ab'},
+#                 'S': {'KNM', 'KN'},
+#             },
+#             'S'
+#         )
 
-        self.assertEqual(
-            algorithms.wipeExcessLambdaRules(input_g),
-            expected_g
-        )
+#         self.assertEqual(
+#             algorithms.wipeExcessLambdaRules(input_g),
+#             expected_g
+#         )
     
-    def test_classic3(self):
-        input_g = Gr(
-            {'S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'S': {'aSbS', 'bSaS', ''}
-            },
-            'S'
-        )
-        expected_g = Gr(
-            {'S', 'new_S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
-                'new_S': {'', 'S'}
-            },
-            'new_S'
-        )
+#     def test_classic3(self):
+#         input_g = Gr(
+#             {'S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'S': {'aSbS', 'bSaS', ''}
+#             },
+#             'S'
+#         )
+#         expected_g = Gr(
+#             {'S', 'new_S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+#                 'new_S': {'', 'S'}
+#             },
+#             'new_S'
+#         )
 
-        self.assertEqual(
-            algorithms.wipeExcessLambdaRules(input_g),
-            expected_g
-        )
+#         self.assertEqual(
+#             algorithms.wipeExcessLambdaRules(input_g),
+#             expected_g
+#         )
 
-    def test_no_lambda_rules(self):
-        input_g = Gr(
-            {'S', 'new_S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
-                'new_S': {'', 'S'}
-            },
-            'new_S'
-        )
-        expected_g = Gr(
-            {'S', 'new_S'},
-            {'a', 'b'},
-            {  # Правила вывода
-                'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
-                'new_S': {'', 'S'}
-            },
-            'new_S'
-        )
+#     def test_no_lambda_rules(self):
+#         input_g = Gr(
+#             {'S', 'new_S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+#                 'new_S': {'', 'S'}
+#             },
+#             'new_S'
+#         )
+#         expected_g = Gr(
+#             {'S', 'new_S'},
+#             {'a', 'b'},
+#             {  # Правила вывода
+#                 'S': {'aSbS', 'abS', 'aSb', 'ab', 'bSaS', 'bSa', 'baS', 'ba'},
+#                 'new_S': {'', 'S'}
+#             },
+#             'new_S'
+#         )
 
-        self.assertEqual(
-            algorithms.wipeExcessLambdaRules(input_g),
-            expected_g
-        )
+#         self.assertEqual(
+#             algorithms.wipeExcessLambdaRules(input_g),
+#             expected_g
+#         )
 
-    def test_empty_language(self):
-        input_g = Gr(
-            {'S', 'E', 'M'},
-            {'a', 'b', 'c'},
-            {  # Правила вывода
-                'E': {''},
-                'M': {''},
-                'S': {'E', 'M', ''},
-            },
-            'S'
-        )
-        expected_g = Gr(
-            {'S'},
-            {'a', 'b', 'c'},
-            {  # Правила вывода
-                'S': {''},
-            },
-            'S'
-        )
+#     def test_empty_language(self):
+#         input_g = Gr(
+#             {'S', 'E', 'M'},
+#             {'a', 'b', 'c'},
+#             {  # Правила вывода
+#                 'E': {''},
+#                 'M': {''},
+#                 'S': {'E', 'M', ''},
+#             },
+#             'S'
+#         )
+#         expected_g = Gr(
+#             {'S'},
+#             {'a', 'b', 'c'},
+#             {  # Правила вывода
+#                 'S': {''},
+#             },
+#             'S'
+#         )
 
-        self.assertEqual(
-            algorithms.wipeExcessLambdaRules(input_g),
-            expected_g
-        )
+#         self.assertEqual(
+#             algorithms.wipeExcessLambdaRules(input_g),
+#             expected_g
+#         )
 
 unittest.main()
