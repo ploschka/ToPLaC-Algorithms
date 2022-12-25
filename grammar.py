@@ -24,12 +24,12 @@ class Grammar:
         """Метод для красивого вывода грамматики с помощью print()"""
         rules = ""
         for non_term in self.P.keys():
-            rules += f"\n\t\t{non_term.symbol} -> " + " | ".join(*[([nt.symbol for nt in st]) for st in self.P[non_term]])
+            rules += f"\n\t\t{non_term.symbol} -> " + " | ".join([":".join([j.symbol for j in i]) for i in self.P[non_term]])
         return f"""{{
-    Нетерминалы: {self.N}
-    Терминалы: {self.T}
+    Нетерминалы: {self.getN()}
+    Терминалы: {self.getT()}
     Правила: {rules}
-    Аксиома: {self.S}
+    Аксиома: {self.getS()}
 }}"""
 
     def __eq__(self, other):
