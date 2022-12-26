@@ -2,10 +2,12 @@ from mytoken import *
 from mytoken import MyToken as Tk
 
 class Grammar:
-    N = set()
-    T = set()
+    N: set[Tk]
+    T: set[Tk]
+    P: dict[Tk, set[tuple[Tk, ...]]]
+    S: Tk
 
-    def __init__(self, N: set[str], T: set[str], P: dict[Tk, set[tuple]], S: str):
+    def __init__(self, N: set[str], T: set[str], P: dict[Tk, set[tuple[Tk, ...]]], S: str):
         self.N = set([Tk(TOKEN_NONTERM, i) for i in N]) # Нетерминалы. Например, {"E", "T", "F"}
         self.T = set([Tk(TOKEN_TERM, i) for i in T]) # Терминалы. Например, {"a", "(", ")"}
         self.P = P # Правила. Например, { "E": {"E+T", "T"}, "T": {"T*F", "F"}, "F": {"(E)", "a"} }
