@@ -21,3 +21,11 @@ class MyToken:
         else:
             t = "Term"
         return t + " " + self.symbol
+
+    def __repr__(self):
+        t = ""
+        if self.isNonTerm():
+            t = "NonTerm"
+        else:
+            t = "Term"
+        return t + " " + self.symbol
