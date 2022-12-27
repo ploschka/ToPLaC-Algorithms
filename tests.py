@@ -1,6 +1,7 @@
 from alg.isLanguageEmpty import isLanguageEmpty
 from alg.unreachableSymbols import unreachableSymbols
 from alg.uselessSymbols import uselessSymbols
+from alg.chomskyNormalForm import chomskyNormalForm
 
 from grammar import Grammar as Gr
 from mytoken import *
@@ -21,8 +22,8 @@ class TestIsLanguageEmpty(unittest.TestCase):
                          Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
                                                   (Tk(TOKEN_TERM, "a"),)},
                      },
-                     "E" # Аксиома
-                    )
+                     "E"  # Аксиома
+                     )
         expected_answer = False
         self.assertEqual(
             isLanguageEmpty(input_g)[0],
@@ -73,9 +74,9 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      set(),  # Терминалы
                      {  # Правила вывода
-                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"), )},
-                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), )},
-                         Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_NONTERM, "A"), )},
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"),)},
+                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"),)},
+                         Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_NONTERM, "A"),)},
                      },
                      "A")  # Аксиома
         expected_answer = True
@@ -88,8 +89,10 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C"},  # Нетерминалы
                      {"a", "b", "c"},  # Терминалы
                      {  # Правила вывода
-                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "B"))},
-                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"))},
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"),
+                                                   Tk(TOKEN_NONTERM, "B"))},
+                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"),
+                                                   Tk(TOKEN_TERM, "c"), Tk(TOKEN_NONTERM, "C"))},
                          Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"))},
                      },
                      "A")  # Аксиома
@@ -103,13 +106,18 @@ class TestIsLanguageEmpty(unittest.TestCase):
         input_g = Gr({"A", "B", "C", "O"},  # Нетерминалы
                      {"a", "b", "c", "o"},  # Терминалы
                      {  # Правила вывода
-                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "O"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
-                                                  (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
+                         Tk(TOKEN_NONTERM, "A"): {(Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"),
+                                                   Tk(TOKEN_NONTERM, "O"), Tk(TOKEN_NONTERM, "B"),
+                                                   Tk(TOKEN_NONTERM, "A")),
+                                                  (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B"),
+                                                   Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
                                                   (Tk(TOKEN_NONTERM, "B"),)},
-                         Tk(TOKEN_NONTERM, "B"): {(Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "o"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "a")),
-                                                  (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "b"))},
+                         Tk(TOKEN_NONTERM, "B"): {
+                             (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "o"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "a")),
+                             (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_TERM, "b"))},
                          Tk(TOKEN_NONTERM, "C"): {(Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"), Tk(TOKEN_TERM, "c"))},
-                         Tk(TOKEN_NONTERM, "O"): {(Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "O"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_TERM, "a")),
+                         Tk(TOKEN_NONTERM, "O"): {(Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "O"),
+                                                   Tk(TOKEN_TERM, "b"), Tk(TOKEN_TERM, "a")),
                                                   (Tk(TOKEN_NONTERM, "A"),)},
                      },
                      "A")  # Аксиома
@@ -134,16 +142,18 @@ class TestUnreachableSymbols(unittest.TestCase):
                      },
                      "E")  # Аксиома
         expected_g = Gr({"E", "T", "F"},  # Нетерминалы
-                     {"a", "+", "*", "(", ")"},  # Терминалы
-                     {  # Правила вывода
-                         Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
-                                                  (Tk(TOKEN_NONTERM, "T"),)},
-                         Tk(TOKEN_NONTERM, "T"): {(Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
-                                                  (Tk(TOKEN_NONTERM, "F"),)},
-                         Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
-                                                  (Tk(TOKEN_TERM, "a"),)},
-                     },
-                     "E")  # Аксиома
+                        {"a", "+", "*", "(", ")"},  # Терминалы
+                        {  # Правила вывода
+                            Tk(TOKEN_NONTERM, "E"): {
+                                (Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                (Tk(TOKEN_NONTERM, "T"),)},
+                            Tk(TOKEN_NONTERM, "T"): {
+                                (Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+                                (Tk(TOKEN_NONTERM, "F"),)},
+                            Tk(TOKEN_NONTERM, "F"): {(Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+                                                     (Tk(TOKEN_TERM, "a"),)},
+                        },
+                        "E")  # Аксиома
 
         self.assertEqual(
             unreachableSymbols(input_g),
@@ -167,8 +177,9 @@ class TestUnreachableSymbols(unittest.TestCase):
         expected_g = Gr({"E", "T"},  # Нетерминалы
                         {"+"},  # Терминалы
                         {  # Правила вывода
-                            Tk(TOKEN_NONTERM, "E"): {(Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
-                                                  (Tk(TOKEN_NONTERM, "T"),)},
+                            Tk(TOKEN_NONTERM, "E"): {
+                                (Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+                                (Tk(TOKEN_NONTERM, "T"),)},
                         },
                         "E")  # Аксиома
         self.assertEqual(
@@ -179,6 +190,7 @@ class TestUnreachableSymbols(unittest.TestCase):
         #     unreachableSymbolsShort(input_g),
         #     expected_g
         # )
+
 
 # class TestExcessLambdaRules(unittest.TestCase):
 #     def test_classic1(self):
@@ -243,7 +255,7 @@ class TestUnreachableSymbols(unittest.TestCase):
 #             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
-    
+
 #     def test_classic3(self):
 #         input_g = Gr(
 #             {'S'},
@@ -317,5 +329,275 @@ class TestUnreachableSymbols(unittest.TestCase):
 #             wipeExcessLambdaRules(input_g),
 #             expected_g
 #         )
+
+
+class TestChomskyNormalForm(unittest.TestCase):
+    def test_example1(self):
+        """
+            S -> aAB | BA
+            A -> BBB | a
+            B -> AS | b
+        """
+        input_g = Gr(
+            {"S", "A", "B"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "S")),
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+            },
+            "S"
+        )
+
+        """
+            S -> <a`><AB> | BA
+            A -> B<BB> | a
+            B -> AS | b
+            <a`> -> a
+            <AB> -> AB
+            <BB> -> BB
+        """
+        expected_g = Gr(
+            {"S", "A", "B", "BB", "AB", "a`"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "AB")),
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "A")),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "BB")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "S"),),
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+                Tk(TOKEN_NONTERM, "a`"): {
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "AB"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                },
+                Tk(TOKEN_NONTERM, "BB"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B")),
+                },
+            },
+            "S"
+        )
+        self.assertEqual(
+            chomskyNormalForm(input_g),
+            expected_g
+        )
+
+    def test_example2(self):
+        """
+            S -> aA | λ
+            A -> BBB | AB | a
+            B -> b
+        """
+        input_g = Gr(
+            {"S", "A", "B"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "A")),
+                    (Tk(TOKEN_TERM, ""),),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+            },
+            "S"
+        )
+
+        """
+            S -> <a`>A | λ
+            A -> B<BB> | AB | a
+            B -> b
+            <a`> -> a
+            <BB> -> BB
+        """
+        expected_g = Gr(
+            {"S", "A", "B", "BB", "a`"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "A")),
+                    (Tk(TOKEN_TERM, ""),),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "BB")),
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+                Tk(TOKEN_NONTERM, "a`"): {
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "BB"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "B")),
+                },
+            },
+            "S"
+        )
+        self.assertEqual(
+            chomskyNormalForm(input_g),
+            expected_g
+        )
+
+    def test_no_changes(self):
+        """
+            S -> AB
+            A -> AA | a
+            B -> b
+        """
+        input_g = Gr(
+            {"S", "A", "B"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "A")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+            },
+            "S"
+        )
+
+        """
+            S -> AB
+            A -> AA | a
+            B -> b
+        """
+        expected_g = Gr(
+            {"S", "A", "B"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                },
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "A")),
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_TERM, "b"),),
+                },
+            },
+            "S"
+        )
+        self.assertEqual(
+            chomskyNormalForm(input_g),
+            expected_g
+        )
+
+    def test_many_terminals(self):
+        """
+            S -> aaaaa
+        """
+        input_g = Gr(
+            {"S", },
+            {"a", },
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "a")),
+                },
+            },
+            "S"
+        )
+
+        """
+            S -> <a`><aaaa>
+            <a`> -> a
+            <aaaa> -> <a`><aaa>
+            <aaa> -> <a`><aa>
+            <aa> -> <a`><a`>
+        """
+        expected_g = Gr(
+            {"S", "a`", "aaaa", "aaa", "aa"},
+            {"a", },
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "aaaa")),
+                },
+                Tk(TOKEN_NONTERM, "a`"): {
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+                Tk(TOKEN_NONTERM, "aaaa"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "aaa")),
+                },
+                Tk(TOKEN_NONTERM, "aaa"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "aa")),
+                },
+                Tk(TOKEN_NONTERM, "aa"): {
+                    (Tk(TOKEN_NONTERM, "a`"), Tk(TOKEN_NONTERM, "a`")),
+                },
+            },
+            "S"
+        )
+        self.assertEqual(
+            chomskyNormalForm(input_g),
+            expected_g
+        )
+
+    def test_terminal_second(self):
+        """
+            S -> Aa
+        """
+        input_g = Gr(
+            {"S", "A"},
+            {"a", },
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_TERM, "a")),
+                },
+            },
+            "S"
+        )
+
+        """
+            S -> A<a`>
+            <a`> -> a
+        """
+        expected_g = Gr(
+            {"S", "A", "a`"},
+            {"a", },
+            {
+                Tk(TOKEN_NONTERM, "S"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "a`")),
+                },
+                Tk(TOKEN_NONTERM, "a`"): {
+                    (Tk(TOKEN_TERM, "a"),),
+                },
+            },
+            "S"
+        )
+        self.assertEqual(
+            chomskyNormalForm(input_g),
+            expected_g
+        )
+
 
 unittest.main()
