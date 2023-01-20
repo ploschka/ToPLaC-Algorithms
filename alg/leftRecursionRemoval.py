@@ -17,7 +17,8 @@ def leftRecursionRemoval(grammar: Gr) -> Gr:
         curr_nonterm = N[i]  # Текущий нетерминал, у которого убираем левую рекурсию
         left_rec_rules, no_left_rec_rules = __find_left_rec_rules(grammar.P[curr_nonterm], curr_nonterm)
         if len(left_rec_rules) != 0:  # Если из нетерминала выводится левая рекурсия и правила нужно изменить
-            new_nonterm = Tk(TOKEN_NONTERM, curr_nonterm.symbol + "'")
+            new_nonterm = Tk(TOKEN_NONTERM, curr_nonterm.symbol + "`")
+            grammar.N.add(new_nonterm)
             grammar.P[curr_nonterm] = no_left_rec_rules | {rule + (new_nonterm,) for rule in no_left_rec_rules}
             grammar.P[new_nonterm] = {rule[1:] for rule in left_rec_rules} | \
                                      {rule[1:] + (new_nonterm,) for rule in left_rec_rules}

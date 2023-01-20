@@ -38,7 +38,7 @@ class Grammar:
         """Оператор равенства грамматик"""
         if set(self.P.keys()) == set(other.P.keys()):
             for rule in self.P:
-                if self.P[rule] != other.P[rule]:
+                if len((self.P[rule] ^ other.P[rule])) != 0:
                     return False
         else:
             return False

@@ -2,6 +2,7 @@ from alg.isLanguageEmpty import isLanguageEmpty
 from alg.unreachableSymbols import unreachableSymbols
 from alg.uselessSymbols import uselessSymbols
 from alg.chomskyNormalForm import chomskyNormalForm
+from alg.leftRecursionRemoval import leftRecursionRemoval as lrr
 
 from grammar import Grammar as Gr
 from mytoken import *
@@ -598,6 +599,210 @@ class TestChomskyNormalForm(unittest.TestCase):
             chomskyNormalForm(input_g),
             expected_g
         )
+
+class LeftRecursionRemoval(unittest.TestCase):
+    def test_classic(self):
+        input_g = Gr(
+        {"A", "B", "C"},
+        {"a", "b"},
+        {
+            Tk(TOKEN_NONTERM, "A"): {
+                (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C")),
+                (Tk(TOKEN_TERM, "a"),)
+            },
+            Tk(TOKEN_NONTERM, "B"): {
+                (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "A")),
+                (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_TERM, "b"))
+            },
+            Tk(TOKEN_NONTERM, "C"): {
+                (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+                (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "C")),
+                (Tk(TOKEN_TERM, "a"),),
+            },
+        },
+        "A"
+        )
+
+        expected_g = Gr(
+            {"A", "B", "C", "B`", "C`"},
+            {"a", "b"},
+            {
+                Tk(TOKEN_NONTERM, "A"): {
+                    (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C")),
+                    (Tk(TOKEN_TERM, "a"),)
+                },
+                Tk(TOKEN_NONTERM, "B"): {
+                    (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "A")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b")),
+                    (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B`")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "B`")),
+                },
+                Tk(TOKEN_NONTERM, "B`"): {
+                    (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "b"), ),
+                    (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "B`")),
+                },
+                Tk(TOKEN_NONTERM, "C"): {
+                    (Tk(TOKEN_TERM, "a"), ),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "B`"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_TERM, "a"), Tk(TOKEN_TERM, "b"), Tk(TOKEN_NONTERM, "B`"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C`")),
+                },
+                Tk(TOKEN_NONTERM, "C`"): {
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B`"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B")),
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B`"), Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "C`")),
+                    (Tk(TOKEN_NONTERM, "C"),),
+                },
+            },
+            "A"
+        )
+
+        self.assertEqual(
+            lrr(input_g),
+            expected_g
+        )
+    
+    # def test_classic2(self):
+    #     input_g = Gr(
+    #     {"E", "T", "F"},
+    #     {"+", "*", "(", ")", "a"},
+    #     {
+    #         Tk(TOKEN_NONTERM, "E"): {
+    #             (Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+    #             (Tk(TOKEN_NONTERM, "T"),)
+    #         },
+    #         Tk(TOKEN_NONTERM, "T"): {
+    #             (Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+    #             (Tk(TOKEN_NONTERM, "F"),)
+    #         },
+    #         Tk(TOKEN_NONTERM, "F"): {
+    #             (Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+    #             (Tk(TOKEN_TERM, "a"),),
+    #         },
+    #     },
+    #     "E"
+    # )
+
+    #     expected_g = Gr(
+    #     {"E", "T", "F", "E`", "T`"},
+    #     {"+", "*", "(", ")", "a"},
+    #     {
+    #         Tk(TOKEN_NONTERM, "E"): {
+    #             (Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_NONTERM, "E`")),
+    #             (Tk(TOKEN_NONTERM, "T"),)
+    #         },
+    #         Tk(TOKEN_NONTERM, "T"): {
+    #             (Tk(TOKEN_NONTERM, "F"), ),
+    #             (Tk(TOKEN_NONTERM, "F"), Tk(TOKEN_NONTERM, "T`")),
+    #             (Tk(TOKEN_TERM, "a"),),                
+    #         },
+    #         Tk(TOKEN_NONTERM, "F"): {
+    #             (Tk(TOKEN_TERM, "("), Tk(TOKEN_NONTERM, "E"), Tk(TOKEN_TERM, ")")),
+    #             (Tk(TOKEN_TERM, "a"),),
+    #         },
+    #         Tk(TOKEN_NONTERM, "E`"): {
+    #             (Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T"), Tk(TOKEN_NONTERM, "E`")),
+    #             (Tk(TOKEN_TERM, "+"), Tk(TOKEN_NONTERM, "T")),
+    #         },
+    #         Tk(TOKEN_NONTERM, "T`"): {
+    #             (Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F")),
+    #             (Tk(TOKEN_TERM, "*"), Tk(TOKEN_NONTERM, "F"), Tk(TOKEN_NONTERM, "T`")),
+    #         },
+    #     },
+    #     "E"
+    # )
+
+    #     self.assertEqual(
+    #         lrr(input_g),
+    #         expected_g
+    #     )
+
+    
+    # def test_classic3(self):
+    #     input_g = Gr(
+    #     {"A", "B", "C"},
+    #     {"a", "b"},
+    #     {
+    #         Tk(TOKEN_NONTERM, "A"): {
+    #             (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C")),
+    #             (Tk(TOKEN_TERM, "a"),)
+    #         },
+    #         Tk(TOKEN_NONTERM, "B"): {
+    #             (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "A")),
+    #             (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_TERM, "b"))
+    #         },
+    #         Tk(TOKEN_NONTERM, "C"): {
+    #             (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+    #             (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "C")),
+    #             (Tk(TOKEN_TERM, "a"),),
+    #         },
+    #     },
+    #     "A"
+    #     )
+
+    #     expected_g = Gr(
+    #         {"S", "A", "a`"},
+    #         {"a", },
+    #         {
+    #             Tk(TOKEN_NONTERM, "S"): {
+    #                 (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "a`")),
+    #             },
+    #             Tk(TOKEN_NONTERM, "a`"): {
+    #                 (Tk(TOKEN_TERM, "a"),),
+    #             },
+    #         },
+    #         "S"
+    #     )
+    #     self.assertEqual(
+    #         lrr(input_g),
+    #         expected_g
+    #     )
+    
+    # def test_classic4(self):
+    #     input_g = Gr(
+    #     {"A", "B", "C"},
+    #     {"a", "b"},
+    #     {
+    #         Tk(TOKEN_NONTERM, "A"): {
+    #             (Tk(TOKEN_NONTERM, "B"), Tk(TOKEN_NONTERM, "C")),
+    #             (Tk(TOKEN_TERM, "a"),)
+    #         },
+    #         Tk(TOKEN_NONTERM, "B"): {
+    #             (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "A")),
+    #             (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_TERM, "b"))
+    #         },
+    #         Tk(TOKEN_NONTERM, "C"): {
+    #             (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "B")),
+    #             (Tk(TOKEN_NONTERM, "C"), Tk(TOKEN_NONTERM, "C")),
+    #             (Tk(TOKEN_TERM, "a"),),
+    #         },
+    #     },
+    #     "A"
+    #     )
+
+    #     expected_g = Gr(
+    #         {"S", "A", "a`"},
+    #         {"a", },
+    #         {
+    #             Tk(TOKEN_NONTERM, "S"): {
+    #                 (Tk(TOKEN_NONTERM, "A"), Tk(TOKEN_NONTERM, "a`")),
+    #             },
+    #             Tk(TOKEN_NONTERM, "a`"): {
+    #                 (Tk(TOKEN_TERM, "a"),),
+    #             },
+    #         },
+    #         "S"
+    #     )
+    #     self.assertEqual(
+    #         lrr(input_g),
+    #         expected_g
+    #     )
 
 
 unittest.main()
